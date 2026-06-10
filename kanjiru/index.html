@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>わたしを感じるノート</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500&family=Shippori+Mincho:wght@400;500&display=swap');
+
+  :root {
+    --bg: #f5f0eb;
+    --surface: #fdfaf7;
+    --surface2: #f0ebe4;
+    --ink: #2c2420;
+    --ink-soft: #7a6e68;
+    --ink-faint: #b5aba3;
+    --accent: #8b6f5e;
+    --accent-light: #c4a898;
+    --accent-warm: #d4956a;
+    --line: #e0d8d0;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 15px;
+  }
+
+  .app-header {
+    width: 100%;
+    max-width: 480px;
+    padding: 32px 24px 16px;
+  }
+  .app-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+  .app-subtitle {
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+  }
+
+  .phase-bar {
+    width: 100%;
+    max-width: 480px;
+    padding: 0 24px 20px;
+  }
+  .phase-dots {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .phase-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--line);
+    transition: all 0.4s ease;
+  }
+  .phase-dot.active { background: var(--accent); width: 24px; border-radius: 4px; }
+  .phase-dot.done { background: var(--accent-light); }
+  .phase-label {
+    font-size: 11px;
+    color: var(--ink-faint);
+    margin-left: 4px;
+    letter-spacing: 0.06em;
+  }
+
+  .main {
+    width: 100%;
+    max-width: 480px;
+    padding: 0 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 20px;
+    border: 1px solid var(--line);
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+
+  .question-text {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--ink);
+  }
+  .question-hint {
+    font-size: 12px;
+    color: var(--ink-faint);
+    line-height: 1.6;
+    margin-top: 8px;
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--ink);
+    resize: none;
+    min-height: 100px;
+    outline: none;
+    line-height: 1.7;
+    transition: border-color 0.2s;
+  }
+  textarea:focus { border-color: var(--accent-light); }
+  textarea::placeholder { color: var(--ink-faint); font-size: 14px; }
+  textarea:disabled { opacity: 0.6; }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent-light);
+  }
+  .btn-secondary:active { opacity: 0.7; }
+
+  .wait-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    gap: 16px;
+  }
+  .wait-icon {
+    font-size: 48px;
+    animation: breathe 4s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%,100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.08); opacity: 1; }
+  }
+  .wait-text {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 16px;
+    color: var(--ink-soft);
+    line-height: 1.8;
+  }
+  .wait-sub { font-size: 12px; color: var(--ink-faint); }
+
+  .awareness-box {
+    background: linear-gradient(135deg, #fef6ee, #fdeee0);
+    border: 1px solid #e8c8aa;
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .awareness-title {
+    font-size: 11px;
+    color: var(--accent-warm);
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .awareness-text {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 15px;
+    line-height: 1.9;
+    color: var(--ink);
+  }
+
+  .summary-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .summary-item:last-child { border-bottom: none; }
+  .summary-q { font-size: 11px; color: var(--ink-faint); margin-bottom: 4px; letter-spacing: 0.06em; }
+  .summary-a { font-size: 14px; color: var(--ink); line-height: 1.6; }
+
+  /* INSCOPE CTA */
+  .inscope-cta {
+    border-top: 1px solid var(--line);
+    padding: 24px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .inscope-cta-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--accent-warm);
+    text-transform: uppercase;
+  }
+  .inscope-cta-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.9;
+  }
+  .inscope-cta-desc {
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.8;
+  }
+  .inscope-cta-link {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--accent-light);
+    color: var(--accent);
+    font-size: 13px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .inscope-cta-link:active { opacity: 0.7; }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hidden { display: none !important; }
+  .spacer { height: 40px; }
+  html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-title">わたしを感じるノート</div>
+  <div class="app-subtitle">うさみちかこ</div>
+</div>
+
+<div class="phase-bar">
+  <div class="phase-dots">
+    <div class="phase-dot active" id="dot0"></div>
+    <div class="phase-dot" id="dot1"></div>
+    <div class="phase-dot" id="dot2"></div>
+    <span class="phase-label" id="phase-label">練習前チェックイン</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- PHASE 0: チェックイン -->
+  <div id="phase-checkin">
+    <div class="card">
+      <div class="section-label">今日の状態を教えてください</div>
+      <div class="question-text">練習を始める前に、<br>今のあなたの状態は？</div>
+      <div class="question-hint">正解はありません。思い浮かんだことをそのまま書いてみてください。</div>
+    </div>
+    <div class="card">
+      <div class="section-label">体調</div>
+      <textarea id="input-body" placeholder="例）肩が少し重い、疲れ気味、体は軽い…" rows="3"></textarea>
+    </div>
+    <div class="card">
+      <div class="section-label">気分・こころの状態</div>
+      <textarea id="input-mood" placeholder="例）少しざわざわしている、落ち着いている、ぼんやりしている…" rows="3"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="startPractice()">練習を始める →</button>
+  </div>
+
+  <!-- PHASE 1: 練習中 -->
+  <div id="phase-practice" class="hidden">
+    <div class="wait-screen">
+      <div class="wait-icon">🌿</div>
+      <div class="wait-text">練習中…<br>そのままゆっくりと<br>感じていてください</div>
+      <div class="wait-sub">終わったら下のボタンを押してください</div>
+    </div>
+    <button class="btn btn-primary" onclick="endPractice()">練習が終わりました</button>
+  </div>
+
+  <!-- PHASE 2: 振り返り -->
+  <div id="phase-reflection" class="hidden">
+    <div id="questions-area"></div>
+    <div id="next-btn-area" class="hidden">
+      <button class="btn btn-primary" onclick="nextQuestion()">次へ →</button>
+    </div>
+    <div id="summary-btn-area" class="hidden">
+      <button class="btn btn-primary" onclick="showSummary()">今日の気づきをまとめる ✦</button>
+    </div>
+  </div>
+
+  <!-- PHASE 3: まとめ -->
+  <div id="phase-summary" class="hidden">
+    <div class="awareness-box" id="summary-awareness"></div>
+    <div class="card">
+      <div class="section-label">今日のセッション記録</div>
+      <div id="summary-record"></div>
+    </div>
+    <button class="btn btn-secondary" onclick="downloadSummary()">📥 気づきをダウンロード</button>
+    <button class="btn btn-primary" onclick="restartApp()">また練習するとき →</button>
+
+    <!-- INSCOPE CTA -->
+    <div class="inscope-cta">
+      <div class="inscope-cta-label">✦ 自分をもっと深く知りたい方へ</div>
+      <div class="inscope-cta-title">感じたことが、言葉になるとき<br>自分への理解は、深まります。</div>
+      <div class="inscope-cta-desc">星図とAIを使った自己理解プログラム<br>INSCOPE について、詳しくはこちら</div>
+      <a class="inscope-cta-link" href="https://echica33.wixsite.com/inscope/ai" target="_blank" rel="noopener">INSCOPE を見てみる →</a>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+
+</div>
+
+<script>
+let state = {
+  body: '', mood: '',
+  answers: [],
+  currentQ: 0
+};
+
+const reflectionQuestions = [
+  {
+    id: 'body',
+    label: '身体の状態',
+    text: '今の身体は、どんな状態ですか？',
+    hint: '重い、軽い、温かい、冷たい、よく分からない、どれでも大丈夫です。'
+  },
+  {
+    id: 'sensation',
+    label: '印象に残った感覚',
+    text: '練習中、印象に残った感覚はありましたか？',
+    hint: '身体の感覚でも、呼吸でも、何も感じなかったという感覚でも構いません。'
+  },
+  {
+    id: 'heart',
+    label: '心の状態',
+    text: '今の心の状態を言葉にすると、どんな感じですか？',
+    hint: '落ち着いている、ぼんやりしている、安心している、ざわざわしている、言葉にならない、など。'
+  },
+  {
+    id: 'word',
+    label: '今日の自分を一言で',
+    text: '今日の自分を一言で表すと？',
+    hint: '正解はありません。頑張りすぎていた・疲れていた・安心していた・力が抜けていた・よく分からない、何でもOKです。'
+  }
+];
+
+function generateAwareness() {
+  const body    = state.answers[0]?.a || '';
+  const sensation = state.answers[1]?.a || '';
+  const heart   = state.answers[2]?.a || '';
+  const word    = state.answers[3]?.a || '';
+
+  const bodyPhrase = (body && body !== '（記入なし）')
+    ? `今の身体は「${body}」という状態ですね。`
+    : `身体の状態をそのまま感じようとしていたこと、それ自体が内観です。`;
+
+  const noSensation = !sensation || sensation === '（記入なし）' || sensation.includes('何も') || sensation.includes('わからない') || sensation.includes('分からない');
+  const sensationPhrase = noSensation
+    ? `「何も感じなかった」という感覚も、立派な気づきです。感じようとしていること自体が、すでに感覚の始まりです。`
+    : `「${sensation}」という感覚に気づけましたね。それがあなたの今日の感覚です。`;
+
+  const heartPhrase = (heart && heart !== '（記入なし）')
+    ? `心の状態を「${heart}」と言葉にできたこと、それがわたしを感じるということです。`
+    : `心の状態を言葉にしようとしたこと、その姿勢がすでに自分への問いかけです。`;
+
+  const wordPhrase = (word && word !== '（記入なし）')
+    ? `今日の自分を「${word}」と表したあなたへ。どんな状態であっても、今日ここに来たことを大切にしてください。`
+    : `今日もここに来てくれてありがとうございます。どんな状態であっても、それがあなたの今日です。`;
+
+  return [bodyPhrase, sensationPhrase, heartPhrase, wordPhrase].join('\n\n');
+}
+
+function updatePhase(n) {
+  [0,1,2].forEach(i => {
+    const dot = document.getElementById('dot' + i);
+    dot.className = 'phase-dot';
+    if (i < n) dot.classList.add('done');
+    else if (i === n) dot.classList.add('active');
+  });
+  const labels = ['練習前チェックイン', '練習中', '振り返り', '完了'];
+  document.getElementById('phase-label').textContent = labels[Math.min(n, 3)];
+}
+
+function startPractice() {
+  const body = document.getElementById('input-body').value.trim();
+  const mood = document.getElementById('input-mood').value.trim();
+  if (!body && !mood) {
+    alert('体調か気分を少しだけ書いてみてください。');
+    return;
+  }
+  state.body = body;
+  state.mood = mood;
+  document.getElementById('phase-checkin').classList.add('hidden');
+  document.getElementById('phase-practice').classList.remove('hidden');
+  updatePhase(1);
+  window.scrollTo(0, 0);
+}
+
+function endPractice() {
+  document.getElementById('phase-practice').classList.add('hidden');
+  document.getElementById('phase-reflection').classList.remove('hidden');
+  updatePhase(2);
+  state.currentQ = 0;
+  state.answers = [];
+  showQuestion(0);
+  window.scrollTo(0, 0);
+}
+
+function showQuestion(index) {
+  if (index >= reflectionQuestions.length) return;
+  const q = reflectionQuestions[index];
+  const area = document.getElementById('questions-area');
+
+  const div = document.createElement('div');
+  div.id = 'q-block-' + index;
+  div.style.cssText = 'animation: fadeSlideIn 0.4s ease; display:flex; flex-direction:column; gap:12px;';
+  div.innerHTML = `
+    <div class="card">
+      <div class="section-label">${q.label}</div>
+      <div class="question-text">${q.text}</div>
+      <div class="question-hint">${q.hint}</div>
+    </div>
+    <div class="card">
+      <textarea id="ans-${index}" placeholder="ここに書いてください…" rows="4"></textarea>
+    </div>
+  `;
+  area.appendChild(div);
+
+  document.getElementById('next-btn-area').classList.add('hidden');
+  document.getElementById('summary-btn-area').classList.add('hidden');
+
+  if (index < reflectionQuestions.length - 1) {
+    document.getElementById('next-btn-area').classList.remove('hidden');
+  } else {
+    document.getElementById('summary-btn-area').classList.remove('hidden');
+  }
+
+  setTimeout(() => div.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+function nextQuestion() {
+  const index = state.currentQ;
+  const ans = document.getElementById('ans-' + index)?.value.trim();
+  state.answers.push({ q: reflectionQuestions[index], a: ans || '（記入なし）' });
+  const ta = document.getElementById('ans-' + index);
+  if (ta) ta.disabled = true;
+  document.getElementById('next-btn-area').classList.add('hidden');
+  state.currentQ++;
+  showQuestion(state.currentQ);
+}
+
+function showSummary() {
+  const lastIndex = reflectionQuestions.length - 1;
+  const ans = document.getElementById('ans-' + lastIndex)?.value.trim();
+  state.answers.push({ q: reflectionQuestions[lastIndex], a: ans || '（記入なし）' });
+  const ta = document.getElementById('ans-' + lastIndex);
+  if (ta) ta.disabled = true;
+  document.getElementById('summary-btn-area').classList.add('hidden');
+  document.getElementById('next-btn-area').classList.add('hidden');
+
+  const awareness = generateAwareness();
+
+  document.getElementById('phase-reflection').classList.add('hidden');
+  document.getElementById('phase-summary').classList.remove('hidden');
+  updatePhase(3);
+
+  document.getElementById('summary-awareness').innerHTML = `
+    <div class="awareness-title">✦ 今日の気づき</div>
+    <div class="awareness-text">${awareness.replace(/\n\n/g, '<br><br>')}</div>
+  `;
+
+  const record = [
+    `<div class="summary-item"><div class="summary-q">練習前 · 体調</div><div class="summary-a">${state.body || '記入なし'}</div></div>`,
+    `<div class="summary-item"><div class="summary-q">練習前 · 気分</div><div class="summary-a">${state.mood || '記入なし'}</div></div>`,
+    ...state.answers.map(item =>
+      `<div class="summary-item"><div class="summary-q">${item.q.label}</div><div class="summary-a">${item.a}</div></div>`
+    )
+  ].join('');
+  document.getElementById('summary-record').innerHTML = record;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function downloadSummary() {
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
+  const awarenessText = document.querySelector('.awareness-text')?.innerText || '';
+
+  const lines = [
+    `わたしを感じるノート｜${dateStr}`,
+    '',
+    '【今日の気づき】',
+    awarenessText,
+    '',
+    '【セッション記録】',
+    `練習前・体調：${state.body || '記入なし'}`,
+    `練習前・気分：${state.mood || '記入なし'}`,
+    ...state.answers.map(item => `${item.q.label}：${item.a}`)
+  ];
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `watashi-wo-kanjiru-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function restartApp() {
+  state = { body: '', mood: '', answers: [], currentQ: 0 };
+  ['input-body','input-mood'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('questions-area').innerHTML = '';
+  ['phase-summary','phase-reflection','phase-practice'].forEach(id =>
+    document.getElementById(id).classList.add('hidden')
+  );
+  document.getElementById('phase-checkin').classList.remove('hidden');
+  updatePhase(0);
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
